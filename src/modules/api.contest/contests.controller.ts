@@ -177,11 +177,59 @@ async function submitMCQ(req: express.Request, res : express.Response){
 
 }
 
+async function createDSAQuestion(req: express.Request, res: express.Response){
+    const contestId = req.params.contestId;
+    const role = (req as any).role;
+    //role should be creator
+
+    if(role != "creator"){
+        res.status(403).json(responses.error("FORBIDDEN"));
+        return;
+    }
+
+    try{
+        //find contest with contestId
+        //if not present --> send response
+        const validateContest = await pool.query("SELECT * FROM contests WHERE id = $1",[contestId]);
+        if(validateContest.rows.length == 0){
+            res.status(404).json(responses.error("CONTEST_NOT_FOUND"));
+            return;
+        }
+        //insert dsa problem -> getId -> insert into 
+
+        const insertDSA : any= await pool.query("INSERT INTO dsa_problems (contest_id, title, description, tags, points, time_limit, memory_limit) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",[contestId, req.body.title, req.body.description, JSON.stringify(req.body.tags), req.body.points, req.body.timeLimit, req.body.memoryLimit])
+        const dsaQuestionId = insertDSA.rows[0].id;
+
+        //insert data into 
+        const testCasesLen = req.body.testCases.length;
+
+        for(let i = 0; i< testCasesLen; i++){
+            await pool.query("INSERT INTO test_cases (problem_id, input, expected_output, is_hidden) VALUES ($1, $2, $3, $4)",[dsaQuestionId,req.body.testCases[i].input, req.body.testCases[i].expectedOutput, req.body.testCases[i].isHidden]);
+            
+            /**for future add a checkpoint that if inserting into the test_cases failes --> should delete the DSA_question row as well, which was just created */
+        }
+           
+        res.status(201).json(responses.success({
+            "id" : insertDSA.rows[0].id,
+            "contestId" : contestId
+        }))
+        return;
+
+
+    }
+    catch(err: any){
+        console.log("internal server error: " + err.message);
+        res.status(500).send("internal server error");
+        return;
+    }
+}
+
 const controller = {
     "createContest": createContest,
     "getContest":getContest,
     "addMCQ" : addMCQ,
-    "submitMCQ":submitMCQ
+    "submitMCQ":submitMCQ,
+    "createDSAQuestion" : createDSAQuestion
 }
 
 export default controller;

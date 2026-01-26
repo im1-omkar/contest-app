@@ -14,8 +14,6 @@ contestsRouter.post("/:contestId/mcq", [auth, validator(validateSchema.addMCQ)],
 
 contestsRouter.post("/:contestId/mcq/:questionId/submit",[auth, validator(validateSchema.submitMCQ)], controller.submitMCQ)
 
-contestsRouter.post("/:contestId/mcq/:contestId/dsa",(req,res)=>{
-    res.status(200).send("/:contestId/mcq POST")
-})
+contestsRouter.post("/:contestId/dsa", [auth, validator(validateSchema.createDSAQuestion)], controller.createDSAQuestion)
 
 export default contestsRouter;
