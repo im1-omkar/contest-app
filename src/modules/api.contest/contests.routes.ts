@@ -8,15 +8,11 @@ const contestsRouter = express.Router();
 
 contestsRouter.post("/", [auth, validator(validateSchema.createContest)], controller.createContest)
 
-contestsRouter.get("/:contestId",/**getContest */)
+contestsRouter.get("/:contestId", auth ,controller.getContest)
 
-contestsRouter.post("/:contestId/mcq",(req,res)=>{
-    res.status(200).send("/:contestId/mcq POST health")
-})
+contestsRouter.post("/:contestId/mcq", [auth, validator(validateSchema.addMCQ)], controller.addMCQ)
 
-contestsRouter.post("/:contestId/mcq/:questionId/submit",(req,res)=>{
-    res.status(200).send("/:contestId/mcq POST")
-})
+contestsRouter.post("/:contestId/mcq/:questionId/submit",[auth, validator(validateSchema.submitMCQ)], controller.submitMCQ)
 
 contestsRouter.post("/:contestId/mcq/:contestId/dsa",(req,res)=>{
     res.status(200).send("/:contestId/mcq POST")
