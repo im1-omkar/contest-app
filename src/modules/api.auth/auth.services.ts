@@ -30,8 +30,9 @@ export async function checkEmail(email:String){
 
 export async function userEnteryInDb(name:string,email:string,hash:string,role:string){
     
-    await pool.query("INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4);",[name,email,hash,role])
+    const result = await pool.query("INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id;",[name,email,hash,role])
 
+    return result.rows[0].id;
 }
 
 /**

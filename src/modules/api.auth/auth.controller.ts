@@ -44,13 +44,18 @@ async function signup(req:express.Request, res:express.Response){
          */
 
         //userEnteryInDb(user,email,hash,role)
-        await userEnteryInDb(name,email,hash,role)
+        const id: number = await userEnteryInDb(name,email,hash,role)
 
         /**
          * send the success message
          */
 
-        res.json(responses.success("user signup successfully"))
+        res.status(201).json(responses.success({
+            "id": id,
+            "name": name,
+            "email":email,
+            "role":role
+        }))
         
 
     }catch(err:any){
