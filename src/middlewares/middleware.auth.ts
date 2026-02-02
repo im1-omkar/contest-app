@@ -1,8 +1,11 @@
 import jwt from "jsonwebtoken";
 import express from "express";
 import responses from "../utils/responses.js";
+import dotenv from "dotenv";
 
-const JWT_SECRET = "JWT_SECRET"
+dotenv.config();
+
+const JWT_SECRET:any = process.env.JWT_SECRET;
 
 const auth = async(req:express.Request, res:express.Response, next: express.NextFunction)=>{
     const bearerToken = req.headers.authorization;
@@ -18,7 +21,7 @@ const auth = async(req:express.Request, res:express.Response, next: express.Next
         return
     }
 
-    jwt.verify(token, JWT_SECRET,(err, decoded:any)=>{
+    jwt.verify(token, JWT_SECRET,(err:any, decoded:any)=>{
         if(err){
             res.status(401).json(responses.error("UNAUTHORIZED"))
             return

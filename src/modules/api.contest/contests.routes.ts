@@ -16,4 +16,6 @@ contestsRouter.post("/:contestId/mcq/:questionId/submit",[auth, validator(valida
 
 contestsRouter.post("/:contestId/dsa", [auth, validator(validateSchema.createDSAQuestion)], controller.createDSAQuestion)
 
+contestsRouter.get("/:contestId/leaderboard",[auth], controller.getLeaderboard);
+
 export default contestsRouter;

@@ -13,7 +13,7 @@ async function createContest(req:express.Request, res:express.Response){
     const endTime = req.body.endTime;
 
     if(role !== "creator"){
-            res.status(401).json(responses.error("FORBIDDEN"));
+            res.status(403).json(responses.error("FORBIDDEN"));
             return
     }
 
@@ -224,12 +224,99 @@ async function createDSAQuestion(req: express.Request, res: express.Response){
     }
 }
 
+async function getLeaderboard(req:express.Request, res:express.Response){
+
+    const contestId = req.params.contestId;
+
+    try{    
+            //contest not found error
+
+            //  fetch mcq submisstion points
+            const mcqQuery = `
+            SELECT ms.user_id, u.name, SUM(ms.points_earned) AS total_mcq
+            FROM mcq_submissions ms
+            JOIN mcq_questions mq ON mq.id = ms.question_id
+            JOIN users u ON u.id = ms.user_id
+            WHERE mq.contest_id = $1
+            GROUP BY ms.user_id, u.name;
+            `;
+            const mcqData = await pool.query(mcqQuery, [contestId]);
+
+
+            // fetch dsa submission point
+            const dsaQuery = `
+            SELECT ds.user_id, u.name, SUM(ds.points_earned) AS total_dsa
+            FROM dsa_submissions ds
+            JOIN dsa_problems dp ON dp.id = ds.problem_id
+            JOIN users u ON u.id = ds.user_id
+            WHERE dp.contest_id = $1
+            GROUP BY ds.user_id, u.name;
+            `;
+            const dsaData = await pool.query(dsaQuery, [contestId]);
+
+
+            //  merger mcq + dsa points
+            const scores : any = {};
+
+            // MCQ points
+            mcqData.rows.forEach(row => {
+            scores[row.user_id] = {
+                userId: row.user_id,
+                name: row.name,
+                totalPoints: Number(row.total_mcq),
+            };
+            });
+
+            // dsa points
+            dsaData.rows.forEach(row => {
+            if (!scores[row.user_id]) {
+                scores[row.user_id] = {
+                userId: row.user_id,
+                name: row.name,
+                totalPoints: 0
+                };
+            }
+
+            scores[row.user_id].totalPoints += Number(row.total_dsa);
+            });
+
+
+            //Convert to array
+            let leaderboard : any = Object.values(scores);
+
+            //Sort by totalPoints desc
+            leaderboard.sort((a: any, b:any) => b.totalPoints - a.totalPoints);
+
+            // Assign rank with tie-handling
+            if (leaderboard.length > 0) {
+            leaderboard[0].rank = 1;
+
+                for (let i = 1; i < leaderboard.length; i++) {
+                    if (leaderboard[i].totalPoints === leaderboard[i - 1].totalPoints) {
+                    leaderboard[i].rank = leaderboard[i - 1].rank;
+                    } else {
+                    leaderboard[i].rank = i + 1;
+                    }
+                }
+            }
+
+            res.status(201).json(responses.success(leaderboard));
+            return;
+    }
+    catch(err:any){
+        console.log("internal server error while createing leaderboard : " + err.message);
+        res.status(500).send("internal servers error");
+    }
+
+}
+
 const controller = {
     "createContest": createContest,
     "getContest":getContest,
     "addMCQ" : addMCQ,
     "submitMCQ":submitMCQ,
-    "createDSAQuestion" : createDSAQuestion
+    "createDSAQuestion" : createDSAQuestion,
+    "getLeaderboard" : getLeaderboard
 }
 
 export default controller;

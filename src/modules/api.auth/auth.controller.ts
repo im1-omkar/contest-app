@@ -11,7 +11,10 @@ async function signup(req:express.Request, res:express.Response){
     const name = req.body.name;
     const email = req.body.email;
     const password = req.body.password;
-    const role = req.body.role;
+    const role = req.body.role ?? "contestee";
+
+    console.log("reached inside singup ....!")
+
 
     try{
 
