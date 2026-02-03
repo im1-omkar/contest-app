@@ -11,7 +11,7 @@ export function validator(validateSchema:any /**here only few specific types of 
             next()
         }
         catch(err:any){
-            console.log("invalid body format, error while checking body format, request on URL : " + req.path )
+           
             res.status(400).json(responses.error("INVALID_REQUEST"))
             return
         }

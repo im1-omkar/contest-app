@@ -13,8 +13,6 @@ async function signup(req:express.Request, res:express.Response){
     const password = req.body.password;
     const role = req.body.role ?? "contestee";
 
-    console.log("reached inside singup ....!")
-
 
     try{
 
@@ -111,7 +109,7 @@ async function signin(req:express.Request,res:express.Response){
     }
     catch(err:any){
         console.log("error while signing-in : " + err)
-        res.status(500).send("internal server error");
+        res.status(500).send("internal server error while signing in");
         return;
     }
 

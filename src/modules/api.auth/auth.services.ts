@@ -2,8 +2,12 @@
 import { email, number } from "zod";
 import { pool } from "../../db/pool.js";
 import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
 
-const JWT_SECRET = "JWT_SECRET";
+dotenv.config();
+
+
+const JWT_SECRET:any = process.env.JWT_SECRET ;
 
 /**
  * write a function to check wheter the email already exists

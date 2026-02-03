@@ -48,7 +48,7 @@ async function getDSAProblem(req:express.Request, res: express.Response ){
 
     }
     catch(err:any){
-        console.log("internal server error : "+ err.message);
+        console.log("internal server error while getting dsa problem : "+ err.message);
         res.status(500).send("internal server error")
         return
     }
@@ -165,7 +165,7 @@ async function submitDSAQuestion(req: express.Request, res: express.Response){
 
     }
     catch(err:any){
-        console.log("internal server error : "+ err.message)
+        console.log("internal server error while submitting error : "+ err.message)
         res.status(500).send("internal server error")
         return
     }

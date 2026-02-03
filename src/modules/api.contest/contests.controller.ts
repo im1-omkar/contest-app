@@ -13,6 +13,7 @@ async function createContest(req:express.Request, res:express.Response){
     const endTime = req.body.endTime;
 
     if(role !== "creator"){
+            console.log("role is not creator .....")
             res.status(403).json(responses.error("FORBIDDEN"));
             return
     }
@@ -21,9 +22,8 @@ async function createContest(req:express.Request, res:express.Response){
 
         //add the contest in DB
         const result = await pool.query("INSERT INTO contests (title, description, creator_id, start_time, end_time) VALUES ($1, $2, $3, $4, $5) RETURNING *",[title, description, creatorId, startTime, endTime])
-        console.log(result)
-        res.status(200).json(responses.success(result.rows[0]));
-        return;    
+        res.status(201).json(responses.success(result.rows[0]));
+        return;
         
     }
     catch(err:any){
@@ -51,7 +51,7 @@ async function getContest(req:express.Request, res:express.Response){
 
         const dsaProblems:any =  await pool.query("SELECT id, title, description, tags, points, time_limit, memory_limit FROM dsa_problems WHERE contest_id = $1",[contestId]);
 
-        res.status(200).json(responses.success({
+        res.status(201).json(responses.success({
             ...result.rows[0],
             mcqs: mcqs.rows,
             dsaProblems: dsaProblems.rows
@@ -59,7 +59,7 @@ async function getContest(req:express.Request, res:express.Response){
 
     }
     catch(err:any){
-        console.log("errro while getting contests : " + err.message)
+        console.log("internal server error --> errro while getting contests : " + err.message)
         res.json("internal server erorr")
     }
 
@@ -97,7 +97,7 @@ async function addMCQ(req: express.Request, res: express.Response){
 
     }
     catch(err: any){
-        console.log("internal server error : " + err);
+        console.log("internal server error while adding MCQ: " + err);
         res.status(500).json(responses.error("internal server erorr"));
         return
     }
@@ -170,7 +170,7 @@ async function submitMCQ(req: express.Request, res : express.Response){
         return
 
     }catch(err:any){
-        console.log("internval server error : " + err.message);
+        console.log("internval server error while submit mcq : " + err.message);
         res.json(500).send("internal server error");
         return;
     }
@@ -218,7 +218,7 @@ async function createDSAQuestion(req: express.Request, res: express.Response){
 
     }
     catch(err: any){
-        console.log("internal server error: " + err.message);
+        console.log("internal server error while creawte DSA question: " + err.message);
         res.status(500).send("internal server error");
         return;
     }
